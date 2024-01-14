@@ -22,7 +22,7 @@ dependencies {
 
     implementation "org.springframework.ai:spring-ai-openai-spring-boot-starter:${springAiVersion}"
 
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    testAndDevelopmentOnly 'org.springframework.boot:spring-boot-devtools'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
