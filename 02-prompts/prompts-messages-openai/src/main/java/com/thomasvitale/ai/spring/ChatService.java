@@ -33,7 +33,8 @@ class ChatService {
     AssistantMessage chatWithMultipleMessages(String message) {
         var systemMessage = new SystemMessage("""
                 You are a helpful and polite assistant.
-                Answer in one sentence.
+                Answer in one sentence using a very formal language
+                and starting the answer with a formal greeting.
                 """);
         var userMessage = new UserMessage(message);
         var prompt = new Prompt(List.of(systemMessage, userMessage));
