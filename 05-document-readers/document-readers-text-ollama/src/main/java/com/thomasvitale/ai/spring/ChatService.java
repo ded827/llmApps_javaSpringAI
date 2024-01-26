@@ -2,8 +2,9 @@ package com.thomasvitale.ai.spring;
 
 import org.springframework.ai.chat.ChatClient;
 import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
@@ -25,26 +26,23 @@ class ChatService {
     }
 
     AssistantMessage chatWithDocument(String message) {
-        var promptTemplate = new PromptTemplate("""
-                Answer questions given the information below (DOCUMENTS section) and no prior knowledge.
+        var systemPromptTemplate = new SystemPromptTemplate("""
+                Answer questions given the context information below (DOCUMENTS section) and no prior knowledge.
+                If the answer is not found in the DOCUMENTS section, simply state that you don't know the answer.
                 In the answer, include the source file name from which the context information is extracted from.
                                 
                 DOCUMENTS:
                 {documents}
-                
-                Given the context information and no prior knowledge, answer the question (QUESTION section).
-                
-                QUESTION:
-                {question}
                 """);
 
         List<Document> similarDocuments = vectorStore.similaritySearch(SearchRequest.query(message).withTopK(2));
         String documents = similarDocuments.stream().map(Document::getContent).collect(Collectors.joining(System.lineSeparator()));
 
-        Map<String,Object> model = Map.of("documents", documents, "question", message);
-        var userMessage = promptTemplate.createMessage(model);
+        Map<String,Object> model = Map.of("documents", documents);
+        var systemMessage = systemPromptTemplate.createMessage(model);
 
-        var prompt = new Prompt(userMessage);
+        var userMessage = new UserMessage(message);
+        var prompt = new Prompt(List.of(systemMessage, userMessage));
 
         var chatResponse = chatClient.call(prompt);
         return chatResponse.getResult().getOutput();
