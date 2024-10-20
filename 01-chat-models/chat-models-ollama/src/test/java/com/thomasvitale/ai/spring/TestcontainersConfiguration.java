@@ -13,7 +13,7 @@ class TestcontainersConfiguration {
     @RestartScope
     @ServiceConnection
     OllamaContainer ollama() {
-        return new OllamaContainer("ollama/ollama");
+        return new OllamaContainer("ollama/ollama").withReuse(true);
     }
 
 }
