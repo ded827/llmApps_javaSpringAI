@@ -9,18 +9,12 @@ Spring AI provides a `ChatModel` low-level abstraction for integrating with LLMs
 When using the _Spring AI OpenAI Spring Boot Starter_, a `ChatModel` object is autoconfigured for you to use OpenAI.
 
 ```java
-@RestController
-class ChatController {
-    private final ChatModel chatModel;
-
-    ChatController(ChatModel chatModel) {
-        this.chatModel = chatModel;
-    }
-
-    @GetMapping("/chat")
-    String chat(@RequestParam(defaultValue = "What did Gandalf say to the Balrog?") String question) {
-        return chatModel.call(question);
-    }
+@Bean
+CommandLineRunner chat(ChatModel chatModel) {
+    return _ -> {
+        var response = chatModel.call("What is the capital of Italy?");
+        System.out.println(response);
+    };
 }
 ```
 
@@ -28,36 +22,40 @@ Spring AI also provides a higher-level abstraction for building more advanced LL
 A `ChatClient.Builder` object is autoconfigured for you to build a `ChatClient` object. Under the hood, it relies on a `ChatModel`.
 
 ```java
-@RestController
-class ChatController {
-    private final ChatClient chatClient;
-
-    ChatClientController(ChatClient.Builder chatClientBuilder) {
-        this.chatClient = chatClientBuilder.build();
-    }
-
-    @GetMapping("/chat")
-    String chat(@RequestParam(defaultValue = "What did Gandalf say to the Balrog?") String question) {
-        return chatClient.prompt()
-                .user(question)
+@Bean
+CommandLineRunner chat(ChatClient.Builder chatClientBuilder) {
+    var chatClient = chatClientBuilder.build();
+    return _ -> {
+        var response = chatClient
+                .prompt("What is the capital of Italy?")
                 .call()
                 .content();
-    }
+        System.out.println(response);
+    };
 }
+```
+
+## OpenAI
+
+The application relies on the OpenAI API for providing LLMs.
+
+### Create an OpenAI account
+
+Visit [https://platform.openai.com](platform.openai.com) and sign up for a new account.
+
+### Configure API Key
+
+In the OpenAI console, navigate to _Dashboard > API Keys_ and generate a new API key.
+Copy and securely store your API key on your machine as an environment variable.
+The application will use it to access the OpenAI API.
+
+```shell
+export OPENAI_API_KEY=<YOUR-API-KEY>
 ```
 
 ## Running the application
 
-The application relies on an OpenAI API for providing LLMs.
-
-First, make sure you have an [OpenAI account](https://platform.openai.com/signup).
-Then, define an environment variable with the OpenAI API Key associated to your OpenAI account as the value.
-
-```shell
-export SPRING_AI_OPENAI_API_KEY=<INSERT KEY HERE>
-```
-
-Finally, run the Spring Boot application.
+Run the application.
 
 ```shell
 ./gradlew bootRun
@@ -65,26 +63,22 @@ Finally, run the Spring Boot application.
 
 ## Calling the application
 
-You can now call the application that will use OpenAI to generate text based on a default prompt.
-This example uses [httpie](https://httpie.io) to send HTTP requests.
+> [!NOTE]
+> These examples use the [httpie](https://httpie.io) CLI to send HTTP requests.
 
-```shell
-http :8080/chat -b
-```
-
-Try passing your custom prompt and check the result.
+Call the application that will use a chat model to answer your question.
 
 ```shell
 http :8080/chat question=="What is the capital of Italy?" -b
 ```
 
-The next request is configured with a custom temperature value to obtain a more creative, yet less precise answer.
+The next request is configured with generic portable options.
 
 ```shell
 http :8080/chat/generic-options question=="Why is a raven like a writing desk? Give a short answer." -b
 ```
 
-The next request is configured with OpenAI-specific customizations.
+The next request is configured with the provider's specific options.
 
 ```shell
 http :8080/chat/provider-options question=="What can you see beyond what you can see? Give a short answer." -b
