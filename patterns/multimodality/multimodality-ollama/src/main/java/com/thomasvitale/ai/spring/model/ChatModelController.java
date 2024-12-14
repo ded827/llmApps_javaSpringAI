@@ -32,7 +32,7 @@ class ChatModelController {
         var userMessage = new UserMessage(question, new Media(MimeTypeUtils.IMAGE_PNG, image));
         var prompt = new Prompt(userMessage);
         var chatResponse = chatModel.call(prompt);
-        return chatResponse.getResult().getOutput().getContent();
+        return chatResponse.getResult().getOutput().getText();
     }
 
 }
