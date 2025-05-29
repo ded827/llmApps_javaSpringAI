@@ -23,6 +23,7 @@ public class RagControllerOptimization {
         var documentRetriever = VectorStoreDocumentRetriever.builder()
                 .vectorStore(vectorStore)
                 .similarityThreshold(0.50)
+                .topK(3)
                 .build();
 
         var queryTransformer = TranslationQueryTransformer.builder()
@@ -42,7 +43,7 @@ public class RagControllerOptimization {
                 .build();
     }
 
-    @PostMapping("/rag/optimization")
+    @PostMapping("/rag/query/optimization")
     String rag(@RequestBody String input) {
         return chatClient.prompt()
                 .advisors(retrievalAugmentationAdvisor)

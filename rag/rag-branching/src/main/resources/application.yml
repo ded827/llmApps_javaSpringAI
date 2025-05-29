@@ -1,6 +1,6 @@
 spring:
   application:
-    name: rag-advanced
+    name: rag-branching
   ai:
     chat:
       observations:

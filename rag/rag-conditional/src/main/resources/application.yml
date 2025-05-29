@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: rag-branching
+  ai:
+    chat:
+      observations:
+        log-completion: true
+        log-prompt: true
+    ollama:
+      init:
+        pull-model-strategy: when_missing
+      chat:
+        options:
+          model: granite3.2:2b
+          num-ctx: 4096
+      embedding:
+        options:
+          model: nomic-embed-text
+    vectorstore:
+      observations:
+        log-query-response: true
+      pgvector:
+        initialize-schema: true
+        dimensions: 768
+        index-type: hnsw
+  http:
+    client:
+      read-timeout: 60s
+  threads:
+    virtual:
+      enabled: true
+
+logging:
+  level:
+    org.springframework.ai.rag: debug
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+arconia:
+  dev:
+    services:
+      postgresql:
+        image-name: pgvector/pgvector:pg17
+  otel:
+    metrics:
+      interval: 5s
